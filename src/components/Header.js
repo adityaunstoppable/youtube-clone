@@ -3,21 +3,31 @@ import { hamIcon, notificationBell, searchIcon } from "../utils/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { setSearchStringAction, setString } from "../utils/searchSlice";
 import { toggleSideBar } from "../utils/sideBarToggleSlice";
+import { Link, useNavigate } from "react-router-dom";
+import { searchCache } from "../utils/suggestionCache";
 
 const Header = () => {
   const dispatch = useDispatch();
-  
+  const navigate = useNavigate()
+  const searchCacheFromRedux = useSelector(state => state.suggestionCache)
   const [searchString, setSearchString] = useState("");
   const [shouldShowSearchResults, setShouldShowSearchResult] = useState(false);
   const [suggetions , setSuggestions] = useState([])
 
 
   useEffect(() => {
-    //debouncing to have effective search , time interval is 200ms
-    const timer = setTimeout(() => {
-        getSuggestions();
-    },200)
+    //debouncing to have effective search , time interval is 300ms
+    let timer;
+    if(searchCacheFromRedux[searchString] && searchCacheFromRedux[searchString] != ""){
+      setSuggestions(searchCacheFromRedux[searchString])
+    }else{
 
+       timer = setTimeout(() => {
+        getSuggestions();
+    },300)
+
+    }
+    
     return () => {
         clearTimeout(timer)
     }
@@ -28,6 +38,8 @@ const Header = () => {
     let data = await fetch(`http://suggestqueries.google.com/complete/search?client=firefox&ds=yt&q=${searchString}`)
     let json = await data.json()
     setSuggestions(json[1])
+
+    dispatch(searchCache({[searchString]:json[1]}))
   };
 
   const searchStringFn = (value) => {
@@ -39,6 +51,7 @@ const Header = () => {
  
 
   const setSuggestionString = (value) => {
+    navigate("/")
     setShouldShowSearchResult(false)  
     setSearchString(value)
     dispatch(setSearchStringAction(value))
@@ -46,16 +59,18 @@ const Header = () => {
 
   return (
     <>
-      <div className="bg-white flex shadow-lg items-center justify-between sticky top-0">
+      <div className="bg-white flex shadow-lg items-center justify-between sticky top-0 z-50">
         {/* ham bar and logo */}
-        <div className="flex items-center relative z-50">
+        <div className="flex items-center relative">
           <div onClick={() => dispatch(toggleSideBar())} className="p-2 m-2 cursor-pointer hover:bg-slate-100 hover:rounded-full">{hamIcon}</div>
+          <Link to="/">
           <img
             src={
               "https://img.freepik.com/premium-vector/youtube-logotype-youtube-is-videosharing-website_686498-399.jpg"
             }
             className="h-11 cursor-pointer"
           />
+          </Link>
         </div>
 
         {/* Search bar */}

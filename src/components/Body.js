@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 
 const Body = () => {
   let tiles = [
@@ -23,7 +24,6 @@ const Body = () => {
   const [searchQuery, setSearchQuery] = useState("Javascript and reactjs");
   const [videosData, setVideosData] = useState([]);
   const searchStringFromRedux = useSelector(state => state.search.searchResultFromThisString)
-  console.log("ADITYA" , searchStringFromRedux)
   
   useEffect(() => {
     setSearchQuery("Lump sum");
@@ -31,15 +31,14 @@ const Body = () => {
   }, []);
 
   useEffect(() => {
-    console.log("ADITYA2" , searchStringFromRedux)
     setSearchQuery(searchStringFromRedux)
     getRecommendedVideos();
   },[searchStringFromRedux])
 
   
+  
   const getRecommendedVideos = async () => {
       let maxResults = 20;
-      console.log("ADITYA3" , searchQuery)
       let data = await fetch(
       `https://www.googleapis.com/youtube/v3/search?key=${API_KEY_YOUTUBE}&part=snippet&type=video&maxResults=${maxResults}&q=${searchStringFromRedux}`
     );
@@ -51,29 +50,31 @@ const Body = () => {
 
   return (
     <>
-      {/* <div className="m-2 p-2  sticky top-16 bg-white">
-                <ul className="flex flex-wrap" style={{position:"relative" , zIndex:"-1"}}>
+      <div className="mt-1  sticky top-0 bg-white" style={{zIndex:"5"}}>
+                <ul className="flex flex-wrap" >
                     {tiles.map(eachTile => (
                         <li className='rounded-lg bg-slate-200 px-2 py-1 m-1 border-none'>{eachTile}</li>
                     ))}
                 </ul>
-            </div> */}
+            </div>
 
       {/* main body with thumbnails */}
       <div
         className="flex flex-wrap"
-        style={{ position: "relative", zIndex: "-10" }}
+        style={{ position: "relative", zIndex: "1" }}
       >
         {/* card */}
         {videosData?.map((eachVideoData , i) => {
           let title = eachVideoData?.snippet?.title;
           title = title.length > 50 ? title.substring(0, 100) + "..." : title;
           return (
-            <div key={i} style={{cursor:"pointer !important"}} className=" mt-4 ">
+            <div key={i} className=" mt-4 ">
+              <Link to={`/videopage/${eachVideoData?.id?.videoId}`}>
               <img
                 src={eachVideoData?.snippet?.thumbnails?.medium?.url}
-                className=" h-40  rounded-lg m-2"
+                className=" h-40 cursor-pointer rounded-lg m-2"
               />
+              </Link>
               <p className="ml-2  w-72 font-semibold text-sm">{title}</p>
             </div>
           );
