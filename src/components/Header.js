@@ -35,12 +35,16 @@ const Header = () => {
 
 
   const getSuggestions = async () => {
-    let data = await fetch(`http://suggestqueries.google.com/complete/search?client=firefox&ds=yt&q=${searchString}`)
-    let json = await data.json()
-    setSuggestions(json[1])
+    try {
+        const response = await fetch(`https://projects-proxy.onrender.com/api/search?searchString=${searchString}`);
+        const json = await response.json();
+        setSuggestions(json[1]); // Assuming json[1] is the correct data you need
 
-    dispatch(searchCache({[searchString]:json[1]}))
-  };
+        dispatch(searchCache({ [searchString]: json[1] }));
+    } catch (error) {
+        console.error('Error fetching suggestions:', error);
+    }
+};
 
   const searchStringFn = (value) => {
     dispatch(setString(value));
